@@ -1,26 +1,32 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
+   
     "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "moduleResolution": "node",  // Use "node" for Node.js-style resolution
+    "esModuleInterop": true,     // Enables compatibility for CommonJS and ES Modules
+    "module": "esnext",          // Use ESNext module system
+    "target": "es6",             // Target ECMAScript 6
+    "strict": true,              // Enables strict mode
+    "skipLibCheck": true,        // Skips type checking for declaration files
+    "resolveJsonModule": true    // Resolves .json files
   },
   "include": [
     "src"
-  ]
+  ],
+  "types": [
+    "@shadcn/ui"
+  ],
+
 }

@@ -1,0 +1,22 @@
+{
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended",
+      "next/core-web-vitals"
+    ],
+    "rules": {
+      "@next/next/no-img-element": "off",
+      "react/react-in-jsx-scope": "off"
+    },
+    "env": {
+      "browser": true,
+      "node": true,
+      "es6": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2020,
+      "sourceType": "module"
+    },
+    "plugins": ["react"]
+  }
+  

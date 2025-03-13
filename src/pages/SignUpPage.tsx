@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { signUpUser } from "../signUpUser"; // Import the signUpUser function
 import { useNavigate } from "react-router-dom";

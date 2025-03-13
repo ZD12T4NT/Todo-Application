@@ -37,25 +37,47 @@ export const Navigation = () => {
     return null;
   }
 
+  // Dynamically change background color based on the route
+  const getNavBackground = () => {
+    let backgroundClasses = "";
+
+    switch (location.pathname) {
+      case "/":
+      case "/home":
+        backgroundClasses = isAtTop
+          ? "bg-transparent text-white"
+          : "bg-white/95 shadow-md rounded-full";
+        break;
+      case "/features":
+      case "/login":
+        backgroundClasses = "text-black";
+        break;
+      case "/signup":
+        backgroundClasses = isAtTop ? "bg-transparent" : "bg-white text-black rounded-full";
+        break;
+      default:
+        backgroundClasses = "bg-white text-black shadow-md"; // Default style for other pages
+    }
+
+    return backgroundClasses;
+  };
+
   return (
     <div
       className={`fixed top-0 left-0 w-full transition-transform duration-300 z-10 ${
         isVisible ? "translate-y-[10px]" : "-translate-y-full"
-      } ${isAtTop ? "bg-transparent text-white" : "bg-white shadow-md rounded-full"}`}
+      } ${getNavBackground()}`}
     >
       <nav className="container mx-auto flex items-center justify-between p-4">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <Link to="/home" aria-label="Home" className="text-[1.7rem] font-bold">
+          <Link to="/" aria-label="Home" className="text-[1.7rem] font-bold">
             My Todo List
           </Link>
         </div>
 
         {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-gray-700"
-          onClick={toggleMobileMenu}
-        >
+        <button className="md:hidden text-gray-700" onClick={toggleMobileMenu}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -75,20 +97,27 @@ export const Navigation = () => {
         </button>
 
         {/* Navbar Links for Desktop */}
-        <div className={`hidden md:flex space-x-6`}>
-          <Link to="/features" className="hover:text-gray-300">
+        <div className="hidden md:flex space-x-6">
+          <Link
+            to="/features"
+            className={`hover:text-gray-300 ${isAtTop ? "text-white" : "text-black"}`}
+          >
             Features
           </Link>
-          <Link to="/dashboard" className="hover:text-gray-300">
-            Dashboard
-          </Link>
 
-          <div className="relative border-l-2 pl-2">
-            <Link to="/login" className=" font-bold hover:text-gray-300">
+          <div className={`relative border-l-2 pl-2 ${isAtTop ? "text-white" : "text-black"}`}>
+            <Link to="/login" className="font-bold hover:text-gray-300">
               Log In
             </Link>
-            <Link to="/signup" className="text-black rounded-md p-2 ml-1.5 bg-white font-bold hover:bg-[#0A122A] hover:text-white transition-all">
-              Sign Up
+            <Link
+              to="/signup"
+              className={`rounded-md p-2 ml-1.5 font-bold transition-all ${
+                isAtTop
+                  ? "bg-transparent text-[#0A122A] bg-white hover:bg-[#0A122A] hover:text-white"
+                  : "bg-[#0A122A] text-white hover:bg-white hover:text-[#0A122A]"
+              }`}
+            >
+              Start for free
             </Link>
           </div>
         </div>
@@ -99,16 +128,10 @@ export const Navigation = () => {
             isMobileMenuOpen ? "block" : "hidden"
           } absolute top-full left-0 bg-white shadow-md w-full md:hidden`}
         >
-          <Link
-            to="/features"
-            className="block px-4 py-2 text-gray-700 hover:bg-gray-200"
-          >
+          <Link to="/features" className="block px-4 py-2 text-gray-700 hover:bg-gray-200">
             Features
           </Link>
-          <Link
-            to="/teamwork"
-            className="block px-4 py-2 text-gray-700 hover:bg-gray-200"
-          >
+          <Link to="/teamwork" className="block px-4 py-2 text-gray-700 hover:bg-gray-200">
             For Teams
           </Link>
         </div>

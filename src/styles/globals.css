@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background: #fefdfc;
+}
+
 @layer utilities {
   .home-clip {
     clip-path: ellipse(180% 100% at 50% 0);

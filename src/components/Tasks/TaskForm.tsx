@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Task } from '../../types/Task';
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
 
 interface TaskFormProps {
   onAddTask: (task: Task) => void;  // Callback to handle adding the task
@@ -11,26 +13,33 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
   const [reminderTime, setReminderTime] = useState<string>(''); // For task reminder (optional)
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Create a new task object
-    const newTask: Task = {
-      id: Date.now().toString(),  // Generate a unique ID
-      name: taskName,             // Task name from the input
-      completed: false,           // Task is not completed initially
-      dueDate: dueDate || undefined, // Optional due date
-      reminderTime: reminderTime || undefined, // Optional reminder time
+  
+    // Create a new task object (without ID, since Firestore generates it)
+    const newTask: Omit<Task, "id"> = {
+      name: taskName,
+      completed: false,
+      dueDate: dueDate || undefined,
+      reminderTime: reminderTime || undefined,
     };
-
-    // Call the onAddTask prop to add the task
-    onAddTask(newTask);
-
-    // Reset the form fields
-    setTaskName('');
-    setDueDate('');
-    setReminderTime('');
+  
+    try {
+      // Add task to Firestore and get the auto-generated ID
+      const docRef = await addDoc(collection(db, "tasks"), newTask);
+  
+      // Call onAddTask to update state with Firestore ID
+      onAddTask({ id: docRef.id, ...newTask });
+  
+      // Reset the form fields
+      setTaskName('');
+      setDueDate('');
+      setReminderTime('');
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
   };
+  
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-4 bg-white p-4 rounded-lg shadow-md">

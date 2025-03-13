@@ -57,7 +57,7 @@ const LoginPage = () => {
       {/* Right Section with Colored Background and Sign-Up Link */}
       <div className="md:w-[40%] bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700 p-10 flex items-center justify-center">
         <div className="text-white text-lg">
-          <p>Don't have an account?</p>
+          <p>Don&apos;t have an account?</p>
           <a
             href="/signup"
             className="underline hover:text-gray-200"
