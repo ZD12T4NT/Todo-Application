@@ -1,20 +1,33 @@
-
 import { useState } from "react";
+import React from 'react';
 import { signUpUser } from "../signUpUser"; // Import the signUpUser function
 import { useNavigate } from "react-router-dom";
 
 const SignupPage = () => {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [profilePic, setProfilePic] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const handleProfilePicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setProfilePic(event.target?.result as string);
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(""); // Clear errors before trying again
 
     try {
-      await signUpUser(email, password);
+      await signUpUser({ firstName, lastName, email, password, profilePic });
       navigate("/dashboard"); // Redirect to dashboard on success
     } catch (err: any) {
       setError(err.message);
@@ -29,6 +42,22 @@ const SignupPage = () => {
           <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
           {error && <p className="text-red-500">{error}</p>}
           <form onSubmit={handleSignup} className="space-y-4">
+            <input
+              type="text"
+              placeholder="First Name"
+              className="border p-2 w-full"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              className="border p-2 w-full"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+            />
             <input
               type="email"
               placeholder="Email"
@@ -45,6 +74,10 @@ const SignupPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <div>
+              <label className="block">Profile Picture</label>
+              <input type="file" accept="image/*" onChange={handleProfilePicUpload} className="border p-2 w-full" />
+            </div>
             <button
               type="submit"
               className="bg-blue-500 text-white px-4 py-2 w-full"
@@ -74,8 +107,6 @@ const SignupPage = () => {
           alt="signup"
           className="w-full h-full object-cover"
         />
-
-{/* https://distantdev.netlify.app/ */}
       </div>
     </div>
   );

@@ -1,45 +1,50 @@
 import React, { useState } from 'react';
-import { Task } from '../../types/Task';
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { Task } from '../../types/Task';  // Import the Task type
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
 
 interface TaskFormProps {
-  onAddTask: (task: Task) => void;  // Callback to handle adding the task
+  onAddTask: (task: Task) => void;  // Callback to add task
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
-  const [taskName, setTaskName] = useState<string>('');    // For task name
-  const [dueDate, setDueDate] = useState<string>('');       // For task due date (optional)
-  const [reminderTime, setReminderTime] = useState<string>(''); // For task reminder (optional)
+  const [taskName, setTaskName] = useState<string>('');  // For task name
+  const [dueDate, setDueDate] = useState<string>('');     // For task due date
+  const [reminderTime, setReminderTime] = useState<string>(''); // For reminder time
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    // Create a new task object (without ID, since Firestore generates it)
-    const newTask: Omit<Task, "id"> = {
+
+    // Create a new task object (without ID since Firestore generates it)
+    const newTask: Omit<Task, 'id'> = {
       name: taskName,
       completed: false,
       dueDate: dueDate || undefined,
       reminderTime: reminderTime || undefined,
     };
-  
+
     try {
       // Add task to Firestore and get the auto-generated ID
-      const docRef = await addDoc(collection(db, "tasks"), newTask);
-  
+      const docRef = await addDoc(collection(db, 'tasks'), newTask);
+
+      // Create task object with Firestore ID
+      const taskWithId: Task = { id: docRef.id, ...newTask };
+
+      // Log the task object for debugging purposes
+      console.log('Adding task:', taskWithId);
+
       // Call onAddTask to update state with Firestore ID
-      onAddTask({ id: docRef.id, ...newTask });
-  
+      onAddTask(taskWithId);
+
       // Reset the form fields
       setTaskName('');
       setDueDate('');
       setReminderTime('');
     } catch (error) {
-      console.error("Error adding task:", error);
+      console.error('Error adding task:', error);
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-4 bg-white p-4 rounded-lg shadow-md">
