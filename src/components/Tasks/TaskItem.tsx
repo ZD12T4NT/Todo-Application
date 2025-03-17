@@ -3,7 +3,7 @@ import { Task } from '../../types/Task';
 
 interface TaskItemProps {
   task: Task;
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => void;  // onRemove expects 'id', which is used correctly
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onRemove }) => {
@@ -12,7 +12,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onRemove }) => {
       <span>{task.name}</span>
       <button
         className="text-red-500"
-        onClick={() => onRemove(task.id)} // Remove task on click
+        onClick={() => onRemove(task.id)}  // task.id used to remove task
       >
         Remove
       </button>

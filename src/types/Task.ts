@@ -1,11 +1,12 @@
 import { supabase } from '../supaBaseClient';
 
 export interface Task {
-  id: string;
+  id: string;  // ID may be optional if Supabase generates it
   name: string;
   completed: boolean;
-  dueDate?: string;  
-  reminderTime?: string;  
+  dueDate?: string | null;
+  reminderTime?: string | null;
+  priority: "Low" | "Medium" | "High";  // ✅ Added priority field
 }
 
 // Fetch tasks from Supabase

@@ -6,20 +6,40 @@ import TaskItem from "../components/Tasks/TaskItem";
 import TaskForm from "../components/Tasks/TaskForm";
 import { Task } from "../types/Task";
 import { Home, User, LogOut, Upload, Settings, Archive, Calendar, PanelLeftClose, ChevronDown, Search } from "lucide-react"; // Added icons
+import { supabase } from "../supaBaseClient"; // Assuming you have this already set up
+import SettingsPage from "../components/UI/Settings"
 
 const DashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("tasks");
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]); // State to store tasks
   const [profile, setProfile] = useState({
     name: "John Doe",
     address: "123 Main St, City",
     password: "",
     profilePic: "",
   });
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State to control sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Set default state to closed
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false); // Profile dropdown state
   const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState<string>(""); // State to store the success message
+
+  // Detect screen width to set sidebar state for smaller screens
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 992) {
+        setIsSidebarOpen(false); // Sidebar should be closed on smaller screens
+      } else {
+        setIsSidebarOpen(true); // Sidebar should be open on larger screens
+      }
+    };
+  
+    handleResize(); // Set initial state based on the current window size
+    window.addEventListener("resize", handleResize); // Add event listener for window resize
+  
+    // Clean up the event listener on component unmount
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,14 +53,52 @@ const DashboardPage = () => {
     checkAuth();
   }, [navigate]);
 
+  // Fetch tasks from Supabase
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const { data, error } = await supabase.from('tasks').select('*');
+      if (error) {
+        console.error('Error fetching tasks:', error);
+      } else {
+        console.log('Fetched tasks:', data); // Log fetched tasks
+        setTasks(data); // Set the tasks from Supabase to the state
+      }
+    };
+
+    fetchTasks(); // Fetch tasks when the component mounts
+  }, []);
+
   const handleLogout = async () => {
     await logoutUser();
     navigate("/login");
   };
 
-  const handleAddTask = (task: Task) => {
+  const handleAddTask = async (task: Task) => {
+    console.log('Adding task:', task); // Log task data to confirm it's correct
     setTasks((prevTasks) => [...prevTasks, task]);
+  
+    // Insert task into Supabase storage
+    try {
+      const { data, error } = await supabase.from('tasks').insert([task]).select().single();
+      if (error) throw error;
+  
+      // Here we assume that Supabase returns the full task with an `id` (or the task is updated with an id)
+      if (data) {
+        setTasks((prevTasks) => prevTasks.map((t) => (t.id === task.id ? { ...t, ...data } : t)));
+      }
+  
+      setSuccessMessage("Task has been added successfully!");
+      console.log("Task added to Supabase:", data);
+    } catch (error) {
+      console.error("Error adding task:", error);
+      setSuccessMessage("Failed to add task.");
+    }
+  
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 3000);
   };
+  
 
   const handleRemoveTask = (id: string) => {
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
@@ -62,7 +120,9 @@ const DashboardPage = () => {
   };
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen); // Toggle sidebar visibility
+    if (window.innerWidth > 992) {
+      setIsSidebarOpen(!isSidebarOpen); // Only allow toggle if the screen width is larger than 992px
+    }
   };
 
   const toggleProfileDropdown = () => {
@@ -76,11 +136,11 @@ const DashboardPage = () => {
       {/* Sidebar */}
       <div
         className={`${
-          isSidebarOpen ? "w-64" : "w-[7%]"
+          isSidebarOpen ? "md:w-64" : "w-[5rem]"
         } bg-[#001514] text-white p-4 flex flex-col justify-between shadow-lg rounded-tr-2xl transition-all duration-300 ease-in-out`}
       >
         <div className={`${isSidebarOpen ? "flex" : "hidden"} flex-col items-center mb-4`}>
-          <label htmlFor="profilePic" className="cursor-pointer relative">
+          <label htmlFor="profilePic" className="cursor-pointer relative hidden md:flex">
             <img
               src={profile.profilePic || "https://images.pexels.com/photos/27797840/pexels-photo-27797840/free-photo-of-the-columns-of-an-ancient-temple-in-athens.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"}
               alt="Profile"
@@ -95,7 +155,7 @@ const DashboardPage = () => {
         <nav className="space-y-2">
           <button
             onClick={() => setActiveTab("tasks")}
-            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === "tasks" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
+            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${isSidebarOpen ? "justify-start" : "justify-center"} ${activeTab === "tasks" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
           >
             <Home size={20} />
             {isSidebarOpen && <span>Tasks</span>}
@@ -103,7 +163,7 @@ const DashboardPage = () => {
 
           <button
             onClick={() => setActiveTab("storage")}
-            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === "storage" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
+            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${isSidebarOpen ? "justify-start" : "justify-center"} ${activeTab === "storage" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
           >
             <Archive size={20} />
             {isSidebarOpen && <span>Task Storage</span>}
@@ -111,7 +171,7 @@ const DashboardPage = () => {
 
           <button
             onClick={() => setActiveTab("calendar")}
-            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === "calendar" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
+            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${isSidebarOpen ? "justify-start" : "justify-center"} ${activeTab === "calendar" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
           >
             <Calendar size={20} />
             {isSidebarOpen && <span>Calendar</span>}
@@ -119,31 +179,33 @@ const DashboardPage = () => {
 
           <button
             onClick={() => setActiveTab("settings")}
-            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${activeTab === "settings" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
+            className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${isSidebarOpen ? "justify-start" : "justify-center"} ${activeTab === "settings" ? "bg-[#FBFAF8] text-[#0A122A]" : "hover:bg-[#FBFAF8] hover:text-[#0A122A]"}`}
           >
-            <Settings size={20} />
+
+            <Settings size={20}/>
             {isSidebarOpen && <span>Settings</span>}
           </button>
+
         </nav>
 
         {/* Logout */}
-        <button onClick={handleLogout} className="flex items-center gap-3 w-full p-3 rounded-lg transition mt-auto bg-[#A3320B] hover:bg-white text-white hover:text-[#001514]">
+        <button onClick={handleLogout} className={`${isSidebarOpen ? "justify-start" : "justify-center"} flex items-center gap-3 w-full p-3 rounded-lg transition mt-auto bg-[#A3320B] hover:bg-white text-white hover:text-[#001514]`}>
           <LogOut size={20} />
           {isSidebarOpen && <span>Logout</span>}
         </button>
       </div>
 
       {/* Close Sidebar Button */}
-      <div className="relative top-4 left-[2%] transform -translate-x-1/2 z-10">
+      <div className="relative top-4 left-[1rem] transform -translate-x-1/2 z-10">
         <button onClick={toggleSidebar} className="inline-flex items-center justify-center text-[#001514] bg-transparent p-2">
           <PanelLeftClose size={24} />
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 pl-0 md:pl-3 p-6">
         {/* Top Navigation */}
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between md:justify-end mb-4">
           <div className="w-1/2 mb-4 mr-[5rem] relative">
             <input
               type="text"
@@ -169,10 +231,12 @@ const DashboardPage = () => {
             )}
           </div>
         </div>
-
         {activeTab === "tasks" && (
           <>
             <TaskForm onAddTask={handleAddTask} />
+            {successMessage && (
+              <div className="mt-4 text-green-500">{successMessage}</div> // Show success message
+            )}
             <div className="mt-4">
               {tasks.map((task) => (
                 <TaskItem key={task.id} task={task} onRemove={handleRemoveTask} />
@@ -180,11 +244,15 @@ const DashboardPage = () => {
             </div>
           </>
         )}
+
         {activeTab === "profile" && (
           <div>
             <input type="text" name="name" value={profile.name} onChange={handleProfileChange} placeholder="Enter your name" className="p-2 border rounded" />
           </div>
         )}
+
+      {activeTab === "settings" && <SettingsPage  />}
+
       </div>
 
       {/* Right-side icons when sidebar is closed */}
