@@ -14,33 +14,19 @@ export const isAuthenticated = async (): Promise<boolean> => {
 
 // Log in a user using Supabase authentication
 export const loginUser = async (email: string, password: string) => {
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // You can store the token in localStorage if needed (Supabase manages sessions automatically)
-    localStorage.setItem('authToken', data?.session?.access_token || ''); // Save the token to localStorage
-    return data;
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error('Login failed: ' + error.message);
-    } else {
-      throw new Error('An unknown error occurred during login.');
-    }
-  }
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) throw new Error(error.message);
+  return data;
 };
+
 
 // Log out the user by removing the authentication token
 export const logoutUser = async () => {
   await supabase.auth.signOut();  // Supabase has a built-in signOut method
-  localStorage.removeItem('authToken');  // Clear the token from localStorage
+
 };
+
+
 
 // Get the current user's information (e.g., from Supabase session)
 export const getCurrentUser = async () => {

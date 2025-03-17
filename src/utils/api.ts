@@ -1,5 +1,5 @@
 // api.ts
-const BASE_URL = 'http://127.0.0.1:5000/api/auth/login';  // Replace with your actual API endpoint
+const BASE_URL = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpqa3ptdXhndGxnd3RpZGRvd2xtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzNTk5NzUsImV4cCI6MjA1NjkzNTk3NX0.Qjloe5PRkbw6yhhNa3IVwEhPubDxoW6sjaxTEmPDxjE'
 
 // Helper function to handle GET requests
 const fetchData = async (url: string) => {

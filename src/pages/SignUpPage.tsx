@@ -80,7 +80,7 @@ const SignupPage = () => {
             </div>
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 w-full"
+              className="bg-[#001514] text-white px-4 py-2 w-full"
             >
               Sign Up
             </button>
@@ -99,14 +99,9 @@ const SignupPage = () => {
           </div>
         </div>
       </div>
-
       {/* Right Section with Image */}
-      <div className="md:w-[40%] bg-gradient-to-r from-blue-500 to-blue-700 flex items-center justify-center">
-        <img
-          src="https://images.pexels.com/photos/30872674/pexels-photo-30872674/free-photo-of-dramatic-cliffs-and-coastline-of-madeira-portugal.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-          alt="signup"
-          className="w-full h-full object-cover"
-        />
+      <div className="md:w-[40%] bg-[#001514] p-10 flex items-center justify-center">
+      
       </div>
     </div>
   );

@@ -1,54 +1,63 @@
 import React, { useState } from 'react';
-import { Task } from '../../types/Task';  // Import the Task type
-import { addDoc, collection } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+import { Task } from '../../types/Task';  
+import { supabase } from '../../supaBaseClient';  
 
 interface TaskFormProps {
-  onAddTask: (task: Task) => void;  // Callback to add task
+  onAddTask: (task: Task) => void;  
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
-  const [taskName, setTaskName] = useState<string>('');  // For task name
-  const [dueDate, setDueDate] = useState<string>('');     // For task due date
-  const [reminderTime, setReminderTime] = useState<string>(''); // For reminder time
+  const [taskName, setTaskName] = useState<string>('');  
+  const [dueDate, setDueDate] = useState<string>('');     
+  const [reminderTime, setReminderTime] = useState<string>('');  
+  const [loading, setLoading] = useState<boolean>(false); // For loading state
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Create a new task object (without ID since Firestore generates it)
-    const newTask: Omit<Task, 'id'> = {
+    console.log('Task Data:', {
       name: taskName,
       completed: false,
-      dueDate: dueDate || undefined,
-      reminderTime: reminderTime || undefined,
+      dueDate: dueDate || null,
+      reminderTime: reminderTime || null,
+    });
+    
+  
+    const newTask = {
+      name: taskName,
+      completed: false,
+      dueDate: dueDate || null,
+      reminderTime: reminderTime || null, // Make sure this is in TIME format
     };
-
+    
+  
     try {
-      // Add task to Firestore and get the auto-generated ID
-      const docRef = await addDoc(collection(db, 'tasks'), newTask);
-
-      // Create task object with Firestore ID
-      const taskWithId: Task = { id: docRef.id, ...newTask };
-
-      // Log the task object for debugging purposes
-      console.log('Adding task:', taskWithId);
-
-      // Call onAddTask to update state with Firestore ID
-      onAddTask(taskWithId);
-
-      // Reset the form fields
+      // Insert task into Supabase
+      const { data, error } = await supabase.from('tasks').insert([newTask]);
+  
+      if (error) {
+        throw error;
+      }
+  
+      if (data) {
+        onAddTask(data[0]);  // Update state with the new task (data[0] is the first task in the array)
+      }
+  
+      // Reset form
       setTaskName('');
       setDueDate('');
       setReminderTime('');
     } catch (error) {
       console.error('Error adding task:', error);
+    } finally {
+      setLoading(false);
     }
   };
-
+  
   return (
     <form onSubmit={handleSubmit} className="flex flex-col space-y-4 bg-white p-4 rounded-lg shadow-md">
-      {/* Task Name */}
       <input
         type="text"
         value={taskName}
@@ -57,29 +66,24 @@ const TaskForm: React.FC<TaskFormProps> = ({ onAddTask }) => {
         className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         required
       />
-      
-      {/* Due Date */}
       <input
         type="date"
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
         className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-
-      {/* Reminder Time */}
       <input
         type="time"
         value={reminderTime}
         onChange={(e) => setReminderTime(e.target.value)}
         className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-
-      {/* Submit Button */}
       <button
         type="submit"
-        className="w-full py-2 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-200"
+        className="w-full py-2 bg-[#001514] text-white font-semibold rounded-md hover:bg-[#A3320B] transition duration-200"
+        disabled={loading}
       >
-        Add Task
+        {loading ? 'Adding...' : 'Add Task'}
       </button>
     </form>
   );

@@ -11,7 +11,7 @@ const HomePage: React.FC = () => {
   return (
     <div>
       {/* Hero Section */}
-      <section className="bg-[#0A122A] text-white home-clip mx-auto px-6 pb-[5rem] sm:pb-32 lg:flex lg:pb-36 lg:pl-8 pt-[11rem] lg:px-8">
+      <section className="bg-[#001514] text-white home-clip mx-auto px-6 pb-[5rem] sm:pb-32 lg:flex lg:pb-36 lg:pl-8 pt-[11rem] lg:px-8">
         <div className="max-w-full lg:max-w-3xl xl:max-w-4xl mx-auto px-6 md:px-12 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
             Stay on top of your tasks with ease

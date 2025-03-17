@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { loginUser } from "../../src/loginUser";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supaBaseClient"; // Import the Supabase client
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -8,14 +9,26 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Handle login logic
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(""); // Reset the error message
 
     try {
-      await loginUser(email, password);
-      navigate("/dashboard"); // Redirect to dashboard on success
+      // Attempt to sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message); // If there's an error, display the error message
+      } else {
+        // If login is successful, navigate to the dashboard
+        navigate("/dashboard");
+      }
     } catch (err: any) {
+      // Catch any unexpected errors
       setError(err.message);
     }
   };
@@ -26,7 +39,7 @@ const LoginPage = () => {
       <div className="md:w-[60%] p-10 flex justify-center items-center">
         <div>
           <h2 className="text-2xl font-bold mb-4">Log In</h2>
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-red-500">{error}</p>} {/* Display error message */}
           <form onSubmit={handleLogin} className="space-y-4">
             <input
               type="email"
@@ -46,7 +59,7 @@ const LoginPage = () => {
             />
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 w-full"
+              className="bg-[#001514] text-white px-4 py-2 w-full"
             >
               Log In
             </button>
@@ -55,7 +68,7 @@ const LoginPage = () => {
       </div>
 
       {/* Right Section with Colored Background and Sign-Up Link */}
-      <div className="md:w-[40%] bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-700 p-10 flex items-center justify-center">
+      <div className="md:w-[40%] bg-[#001514] p-10 flex items-center justify-center">
         <div className="text-white text-lg">
           <p>Don&apos;t have an account?</p>
           <a

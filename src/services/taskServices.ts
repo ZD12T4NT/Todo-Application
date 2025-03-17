@@ -1,21 +1,22 @@
-import { Task } from '../types/Task';
+import { supabase } from '../supaBaseClient';
+import type { Task } from '../types/Task';  // ✅ Use type import to avoid circular issue
 
-const TASK_API_URL = '/api/tasks'; // replace with your actual API endpoint
-
+// Fetch tasks from Supabase
 export const getTasks = async (): Promise<Task[]> => {
-  const response = await fetch(TASK_API_URL);
-  return response.json();
+  const { data, error } = await supabase.from('tasks').select('*');
+  if (error) throw new Error(error.message);
+  return data;
 };
 
-export const addTask = async (task: Task): Promise<Task> => {
-  const response = await fetch(TASK_API_URL, {
-    method: 'POST',
-    body: JSON.stringify(task),
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return response.json();
+// Add a new task in Supabase
+export const addTask = async (task: Omit<Task, 'id'>): Promise<Task> => { // ✅ Remove 'id' when inserting
+  const { data, error } = await supabase.from('tasks').insert([task]).select().single();
+  if (error) throw new Error(error.message);
+  return data;
 };
 
+// Remove a task from Supabase
 export const removeTask = async (id: string): Promise<void> => {
-  await fetch(`${TASK_API_URL}/${id}`, { method: 'DELETE' });
+  const { error } = await supabase.from('tasks').delete().eq('id', id);
+  if (error) throw new Error(error.message);
 };
